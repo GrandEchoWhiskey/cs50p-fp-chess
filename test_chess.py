@@ -1,4 +1,4 @@
-from chess import Color, Position
+from chess import Color, Position, Board, King, Queen, Rook, Knight, Bishop, Pawn
 import unittest
 
 
@@ -74,7 +74,7 @@ class TestSum_Position(unittest.TestCase):
         self.assertEqual(Position._Position__validate(0), 0)
         self.assertEqual(Position._Position__validate(7), 7)
         self.assertRaises(ValueError, Position._Position__validate, -1)
-        self.assertRaises(ValueError, Position._Position__validate, 9)
+        self.assertRaises(ValueError, Position._Position__validate, 8)
 
     def test_names(self):
         pos = Position.from_str('a2')
@@ -92,9 +92,82 @@ class TestSum_Position(unittest.TestCase):
         
 
 class TestSum_Board(unittest.TestCase):
-    
-    def blank(self):
-        pass
+
+    def test_init(self):
+        board1 = Board()
+        board2 = Board({'e1': King(Color.WHITE), 'd2': Pawn(Color.WHITE)})
+        self.assertEqual(board1._Board__pieces['a2'].color, Color.WHITE)
+        self.assertEqual(board1._Board__pieces['a2'].name, "Pawn")
+        self.assertEqual(board1._Board__pieces['a2'].color, Color.WHITE)
+        self.assertEqual(board1._Board__pieces['a2'].name, "Pawn")
+        self.assertEqual(board1._Board__pieces['d4'], None)
+        self.assertEqual(board2._Board__pieces['e1'].color, Color.WHITE)
+        self.assertEqual(board2._Board__pieces['e1'].name, "King")
+        self.assertEqual(board2._Board__pieces['d2'].color, Color.WHITE)
+        self.assertEqual(board2._Board__pieces['d2'].name, "Pawn")
+        self.assertEqual(board2._Board__pieces['a8'], None)
+
+    def test_from_fen(self):
+        board = Board.from_fen()
+        self.assertEqual(board._Board__pieces['e1'].color, Color.WHITE)
+        self.assertEqual(board._Board__pieces['e1'].name, "King")
+        self.assertEqual(board._Board__pieces['d8'].color, Color.BLACK)
+        self.assertEqual(board._Board__pieces['d8'].name, "Queen")
+        self.assertEqual(board._Board__pieces['d2'].color, Color.WHITE)
+        self.assertEqual(board._Board__pieces['d2'].name, "Pawn")
+        self.assertEqual(board._Board__pieces['c8'].color, Color.BLACK)
+        self.assertEqual(board._Board__pieces['c8'].name, "Bishop")
+        self.assertEqual(board._Board__pieces['a8'].color, Color.BLACK)
+        self.assertEqual(board._Board__pieces['a8'].name, "Rook")
+        self.assertEqual(board._Board__pieces['b1'].color, Color.WHITE)
+        self.assertEqual(board._Board__pieces['b1'].name, "Knight")
+        self.assertRaises(ValueError, Board.from_fen, "rnbqkbnr/pp1ppppp/8/2p5/4P3/6N2/PPPP1PPP/RNBQKB1R") #Invalid 6N2 -> 9
+        self.assertRaises(ValueError, Board.from_fen, "rnbqkbnr/pp1ppppp/8/2p5/4C3/5N2/PPPP1PPP/RNBQKB1R") #Invalid 4C3 -> C
+        self.assertRaises(ValueError, Board.from_fen, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R/4B3") #Invalid 4B3 -> 9
+
+    def test_fen(self):
+        board1 = Board.from_fen()
+        board2 = Board.from_fen("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R")
+        self.assertEqual(board1.fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+        self.assertEqual(board2.fen, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R")
+
+    def test_move(self):
+        board = Board.from_fen()
+        board.move(Position.from_str('e2'), Position.from_str('e4'))
+        board.move(Position.from_str('e7'), Position.from_str('e5'))
+        board.move(Position.from_str('g1'), Position.from_str('f3'))
+        board.move(Position.from_str('b8'), Position.from_str('c6'))
+        board.move(Position.from_str('f1'), Position.from_str('c4'))
+        self.assertEqual(board.fen, "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R")
+
+    def test_replace(self):
+        board = Board({'e8': Pawn(Color.WHITE)})
+        board.replace(Position.from_str('e8'), Queen(Color.WHITE))
+        self.assertEqual(board.fen, "4Q3/8/8/8/8/8/8/8")
+
+
+class TestSum_Piece(unittest.TestCase):
+
+    def test_pawn_moves(self):
+
+        # 2nd and 7th row
+        board = Board()
+        self.assertEqual(len(board.pieces['e2'].moves(board, Position.from_str('e2'))), 2)
+        self.assertEqual(len(board.pieces['e7'].moves(board, Position.from_str('e7'))), 2)
+
+        # En Passant
+        board1 = Board({'e5':Pawn(Color.WHITE), 'd7':Pawn(Color.BLACK)})
+        board2 = Board({'e4':Pawn(Color.BLACK), 'd2':Pawn(Color.WHITE)})
+        board3 = Board({'e4':Pawn(Color.BLACK), 'd2':Pawn(Color.BLACK)})
+        board1.move(Position.from_str('d7'), Position.from_str('d5'))
+        board2.move(Position.from_str('d2'), Position.from_str('d4'))
+        board3.move(Position.from_str('d2'), Position.from_str('d4')) # Theoretical
+        self.assertEqual(len(board1.pieces['e5'].moves(board1, Position.from_str('e5'))), 2)
+        self.assertEqual(len(board1.pieces['d5'].moves(board1, Position.from_str('d5'))), 1)
+        self.assertEqual(len(board2.pieces['e4'].moves(board2, Position.from_str('e4'))), 2)
+        self.assertEqual(len(board3.pieces['e4'].moves(board3, Position.from_str('e4'))), 1)
+        
+
 
 if __name__ == '__main__':
     unittest.main()
