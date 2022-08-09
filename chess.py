@@ -65,6 +65,10 @@ class Board:
     Board - All needed information about the board state - such as the board itself, 
     current colors turn, casteling rights, en passant, halfmoves made and the full moves
     """
+
+    KING_SITE = 0
+    QUEEN_SITE = 1
+
     def __init__(self, fen:str="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") -> None:
         try:
             self.__board:dict = self.__from_fen(fen.split(' ')[0])
@@ -76,6 +80,14 @@ class Board:
             self.__history:list = []
         except:
             return ValueError
+
+    def __move(self, f:Position, t:Position) -> None:
+        self.__board[str(t)] = self.__board[str(f)]
+        self.__board[str(f)] = None
+
+    def __castle(self, king_pos:Position, site:bool) -> bool:
+        if piece := self.board[str(king_pos)]:
+            pass
 
     def __remove_castle(self, char:str) -> None:
         self.__castle_rights = self.__castle_rights.replace(char, '')
@@ -93,6 +105,13 @@ class Board:
             return False
         if self.turn != self.board[from_str].color:
             return False
+        for key in self.board[str(Position(from_str))].keys():
+            if piece := self.board[key]:
+                if str(piece).lower() == 'k':
+                    if self.__in_check(Position(from_str), self.turn):
+                        return False
+                
+
 
     def __is_draw_rounds(self) -> bool:
         if self.__half_moves >= 100:
