@@ -51,6 +51,14 @@ class Position:
     def position(self) -> tuple:
         return self.__pos
 
+    @property
+    def x(self):
+        return self.position[0]
+
+    @property
+    def y(self):
+        return self.position[1]
+
 
 class Board:
     """
@@ -89,6 +97,14 @@ class Board:
     def __is_draw_rounds(self) -> bool:
         if self.__half_moves >= 100:
             return True
+        return False
+
+    def __in_check(self, square:Position, for_color:bool) -> bool:
+        for key in self.board.keys():
+            if piece := self.board[key]:
+                if piece.color != for_color:
+                    if square in piece.moves(self):
+                        return True
         return False
 
     @property
@@ -268,8 +284,22 @@ class Pawn(Piece):
     def moves(self, board:Board) -> list:
         res:list = []
 
-        y_vector:int = 1 if self.color == WHITE else -1
-        if not (piece1 := board.board[str(self.position.at((0, y_vector)))]):
-            if piece2 := board.board[str(self.position.at((0, y_vector)))]:
+        y:int = 1 if self.color == WHITE else -1
+        square:int = 2 if self.color == WHITE else 7
+
+        for x in [-1, 1]:
+            if piece := board.board[str(self.position.at((x, y)))]:
+                if piece.color != self.color:
+                    res.append(self.position.at((x, y)))
+
+            if str(self.position.at((x, y))) == board.en_passant:
+                res.append(self.position.at((x, y)))
+
+        if not board.board[str(self.position.at((0, y)))]:
+            res.append(self.position.at((0, y)))
+
+            if not board.board[str(self.position.at((0, y*2)))]:
+                if self.position == Position.from_tuple((self.position.x, square)):
+                    res.append(self.position.at((0, y)))
 
         return res
