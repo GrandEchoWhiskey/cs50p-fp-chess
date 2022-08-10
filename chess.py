@@ -93,6 +93,10 @@ class Board:
                 if str(rook).lower() != 'r':
                     return False
                 site:int = 1 if rook.position.x > king.position.x else -1
+                if self.__in_check(Position.at(king_pos, (site, 0)), self.turn):
+                    return False
+                if self.__in_check(Position.at(king_pos, (2*site, 0)), self.turn):
+                    return False
                 self.__board[str(rook)] = None
                 self.__move(king_pos, Position.at(king_pos, (2*site, 0)))
                 self.__board[str(Position.at(king_pos, (site, 0)))]
@@ -330,5 +334,14 @@ class Pawn(Piece):
             if not board.board[str(self.position.at((0, y*2)))]:
                 if self.position == Position.from_tuple((self.position.x, square)):
                     res.append(self.position.at((0, y)))
+        return res
 
+    @classmethod
+    def promote(cls, char):
+        res:Piece
+        while res := cls.child(char):
+            if not res:
+                raise ValueError
+            if str(res).lower() == 'p':
+                raise ValueError
         return res
