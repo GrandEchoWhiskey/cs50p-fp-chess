@@ -85,9 +85,19 @@ class Board:
         self.__board[str(t)] = self.__board[str(f)]
         self.__board[str(f)] = None
 
-    def __castle(self, king_pos:Position, site:bool) -> bool:
-        if piece := self.board[str(king_pos)]:
-            pass
+    def __castle(self, king_pos:Position, rook_pos:Position) -> bool:
+        if king := self.board[str(king_pos)]:
+            if str(king).lower() != 'k':
+                return False
+            if rook := self.board[str(rook_pos)]:
+                if str(rook).lower() != 'r':
+                    return False
+                site:int = 1 if rook.position.x > king.position.x else -1
+                self.__board[str(rook)] = None
+                self.__move(king_pos, Position.at(king_pos, (2*site, 0)))
+                self.__board[str(Position.at(king_pos, (site, 0)))]
+                return True
+        return False
 
     def __remove_castle(self, char:str) -> None:
         self.__castle_rights = self.__castle_rights.replace(char, '')
