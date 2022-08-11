@@ -184,7 +184,9 @@ class Board:
 
     @property
     def en_passant(self) -> Position:
-        return Position(self.__en_passant)
+        if self.__en_passant != '-':
+            return Position(self.__en_passant)
+        return None
 
 
 class Piece:
