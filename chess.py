@@ -10,42 +10,64 @@ class Position:
     __alpha:str = "abcdefgh"
     __numbr:str = "12345678"
 
-    def __init__(self, square:str) -> None:
+    def __init__(self, square:str):
         self.__pos:tuple = self.__from_str(square)
 
     def __from_str(self, string) -> tuple:
-        try:
-            return tuple((self.__alpha.index(string[0]), self.__numbr.index(string[1])))
-
-        except:
-            raise ValueError
+        
+        if len(string) != 2:
+        	raise ValueError
+        	
+        if string[0] not in self.__alpha:
+        	raise ValueError
+        	
+        if string[1] not in self.__numbr:
+        	raise ValueError
+        	
+        return tuple((self.__alpha.index(string[0]), self.__numbr.index(string[1])))
 
     def __str__(self) -> str:
+        
         return self.__alpha[self.__pos[0]] + self.__numbr[self.__pos[1]]
 
     def __eq__(self, other) -> bool:
+        
         return self.position == other.position
 
     def __ne__(self, other) -> bool:
+        
         return not self.__eq__(other)
 
     @classmethod
     def from_tuple(cls, t:tuple):
-        if len(t) != 2:
+        
+        if not cls.validate_tuple(t):
             raise ValueError
-        if t[0] > 8 or t[0] < 1:
-            raise ValueError
-        if t[1] > 8 or t[1] < 1:
-            raise ValueError
+            
         return cls(cls.__alpha[t[0]] + cls.__numbr[t[1]])
+        
+    @classmethod
+    def validate_tuple(cls, t:tuple):
+    	
+    	if len(t) != 2:
+    		return False
+    	    	
+    	if not str(t[0]).isnumeric() or \
+    		not str(t[1]).isnumeric():
+        	return False
+        	
+    	if t[0] not in range(8) or \
+     	   t[1] not in range(8):
+        	return False
+        	
+    	return True
 
     def at(self, vector:tuple):
-        try:
-            if len(vector) != 2:
-                raise ValueError
-            return self.__class__.from_tuple((self.position[0] + vector[0], self.position[1] + vector[1]))
-        except:
-            return None
+    	
+    	if self.validate_tuple(vector):
+    		return self.__class__.from_tuple((self.position[0] + vector[0], self.position[1] + vector[1]))
+    		
+    	return None
 
     @property
     def position(self) -> tuple:
@@ -69,7 +91,7 @@ class Board:
     KING_SITE = 0
     QUEEN_SITE = 1
 
-    def __init__(self, fen:str="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") -> None:
+    def __init__(self, fen:str="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
         try:
             self.__board:dict = self.__from_fen(fen.split(' ')[0])
             self.__turn:bool = BLACK if fen.split(' ')[1] == 'b' else WHITE
@@ -79,7 +101,7 @@ class Board:
             self.__full_moves:int = int(fen.split(' ')[5])
             self.__history:list = []
         except:
-            return ValueError
+            raise ValueError
 
     def __move(self, f:Position, t:Position) -> None:
         self.__board[str(t)] = self.__board[str(f)]
@@ -190,7 +212,7 @@ class Board:
 
 
 class Piece:
-    def __init__(self, position:Position, color:bool) -> None:
+    def __init__(self, position:Position, color:bool):
         self.__position:Position = position
         self.__color:bool = color
 
