@@ -1,6 +1,9 @@
 from vector import vector
 
 class position(vector):
+	"""
+	Chess board positioning
+	"""
 	
 	__alpha = 'abcdefgh'
 	__nums = '12345678'
@@ -34,5 +37,3 @@ class position(vector):
 	def nums(cls):
 		return cls.__nums
 		
-p=position.tuple((3,8))
-print(str(p.as_tuple))

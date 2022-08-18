@@ -1,4 +1,7 @@
 class vector:
+	"""
+	2DVectors: float and int only accepted
+	"""
 	
 	def __init__(self, x, y):
 		if type(x) not in [int, float]:
@@ -57,3 +60,4 @@ class vector:
 	@property
 	def as_tuple(self) -> tuple:
 		return (self.x, self.y)
+		
