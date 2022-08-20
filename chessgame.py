@@ -2,7 +2,7 @@ import pygame as pg
 import chess
 
 class Game:
-    def __init__(self, game=chess.Game(), color=chess.Color.WHITE, width=400, height=400):
+    def __init__(self, game=chess.Board(), color=chess.Color.WHITE, width=400, height=400):
         pg.init()
         self.color = color
         self.__surface = pg.display.set_mode((width, height))
@@ -39,13 +39,13 @@ class Game:
         tile_height = self.__surface.get_height()//8
         for i in range(8):
             for j in range(8):
-                for pkey in self.game.board.pieces.keys():
+                for pkey in self.game.board.keys():
                     if pkey == str(chess.Position(j, i)):
                         mp_x = (7-i) if self.color == chess.Color.WHITE else i
                         mp_y = j if self.color == chess.Color.WHITE else (7-j)
-                        if not self.game.board.pieces[pkey]:
+                        if not self.game.board[pkey]:
                             continue
-                        self.__surface.blit(self.graphics[str(self.game.board.pieces[pkey])], (mp_y*tile_width, mp_x*tile_height))
+                        self.__surface.blit(self.graphics[str(self.game.board[pkey])], (mp_y*tile_width, mp_x*tile_height))
            
         pg.display.update()
                 

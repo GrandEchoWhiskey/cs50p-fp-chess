@@ -40,14 +40,21 @@ class vector:
 		
 	def __str__(self):
 		return '<'+str(self.x)+';'+str(self.y)+'>'
-
+	
+	def __get__(self, obj, objtype):
+		return (self.x, self.y)
+	
 	@classmethod
 	def tuple(cls, t:tuple):
 		
 		if len(t) != 2:
 			raise ValueError
-			
+		
 		return cls(t[0], t[1])
+		
+	@property
+	def as_tuple(self):
+		return (self.x, self.y)
 
 	@property
 	def x(self):
@@ -56,8 +63,4 @@ class vector:
 	@property
 	def y(self):
 		return self.__y
-		
-	@property
-	def as_tuple(self) -> tuple:
-		return (self.x, self.y)
-		
+
